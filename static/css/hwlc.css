@@ -1,0 +1,137 @@
+body { 
+    margin:0;
+    padding-top:60px;
+    font-family:helvetica, sans-serif; 
+}
+
+a { 
+    color:#00abff;
+    text-decoration:none; 
+}
+
+h1 { 
+    font-weight:normal;
+    border-bottom:1px solid #bbb;
+    padding:0 0 10px 0;
+}
+
+h2 {
+    font-weight:normal;
+    margin:30px 0 0;
+}
+
+#login-form {
+    background-color: #fff;
+}
+
+/* pagination */
+.pagination { 
+    margin:40px 0; 
+    font-weight:bold;
+}
+
+.errorlist { 
+    color:#cc0033;
+    float:left;
+    clear:both;
+    padding-left:10px; 
+}
+
+table {
+    width:100%;
+    border-spacing:10px;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    text-align:left;
+    font-size:18px;
+    padding:10px;
+    margin:0;
+}
+
+tbody tr:nth-child(odd) {
+    background:#efefef;
+}
+
+tbody tr.subtotal {
+    background:rgb(228, 230, 223);
+}
+
+thead th, tbody tr.total {
+    background:#5993bb;
+    color:#fff;
+    font-weight:bold;
+}
+
+a.button, input[type="submit"] {
+    color:#fff;
+    background:#00abff;;
+    /* margin-top: 10px; */
+    border-radius:4px;
+    padding:10px 20px;
+    font-weight: bold;
+    font-size:16px;
+    border:0;
+}
+
+.dropdown-item:hover {
+    background-color: black;
+    color: white;
+    margin: 2px;
+    width: calc(100% - 4px);
+    border-radius: 4px;
+}
+
+/* messages */
+ul.messages {
+    margin:10px 100px;
+    padding:0;
+    list-style-type:
+    none;
+}
+ul.messages li.success,
+ul.messages li.warning,
+ul.messages li.error,
+ul.messages li.info {
+    margin:0;
+    padding:14px 20px;
+    list-style:none;
+    color:#fff;
+}
+
+ul.messages li.success { background:#81ce81; }
+ul.messages li.success a { color:#0ac33e; }
+
+ul.messages li.error { background:#a30029; color:#e9828e; }
+ul.messages li.error a { color:#e9828e; }
+
+ul.messages li.info { background:#faffae; color:#696b4e; }
+ul.messages li.info a { color:#1586de; }
+
+ul.messages li.warning { background:#de9404; }
+ul.messages li.warning a { color:#f49000; }
+
+ul.messages li a.close {
+    margin:0;
+    float:right;
+    opacity:1;
+    border:0;
+    box-shadow:none;
+    text-shadow:none;
+}
+
+
+
+/* comments */
+/* .comment {
+    padding:10px;
+}
+.comment:nth-child(even) {
+    background:#efefef;
+}
+.comment .info {
+    font-weight:bold;
+    font-size:12px;
+    color:#666;
+} */

@@ -1,0 +1,7 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "cSpell.enableFiletypes": [
+        "!css",
+        "!python"
+    ]
+}
