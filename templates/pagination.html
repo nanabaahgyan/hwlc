@@ -1,0 +1,21 @@
+<div class="pagination">
+    <span class="step-links">
+        {% if page.has_previous %}
+        {% if query %}
+        <a href="?page={{ page.previous_page_number }}&query={{ query|urlencode }}" class="btn btn-dark btn-sm" role="button" title="Go to previous page"><i class="fa-regular fa-circle-left"></i></a>
+        {% else %}
+        <a href="?page={{ page.previous_page_number }}" class="btn btn-dark btn-sm" role="button" title="Go to previous page"><i class="fa-regular fa-circle-left"></i></i></a>
+        {% endif %}
+        {% endif %}
+        <span class="current">
+            Page {{ page.number }} of {{ page.paginator.num_pages }}
+        </span>
+        {% if page.has_next %}
+        {% if query %}
+        <a href="?page={{ page.next_page_number }}&query={{ query|urlencode }}" class="btn btn-dark btn-sm" role="button" title="Go to next page"><i class="fa-regular fa-circle-right"></i></a>
+        {% else %}
+        <a href="?page={{ page.next_page_number }}" class="btn btn-dark btn-sm" role="button" title="Go to next page"><i class="fa-regular fa-circle-right"></i></a>
+        {% endif %}
+        {% endif %}
+    </span>
+</div>

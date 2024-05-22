@@ -77,7 +77,7 @@ class NextOfKin(models.Model):
                             blank=False,
                             null=False,
                             max_length=3)
-    to_member = models.ForeignKey(User,
+    to_member = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   on_delete=models.CASCADE,
                                   related_name='user_next_of_kin')
 

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'crispy_forms',
     'crispy_bootstrap5',
+    'fontawesomefree',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
+    '/home/nbg/Python/PyDev Project/hwlcApp/.hwlc-env/lib/python3.10/site-packages/fontawesomefree/static/'
 ]
 
 # Serving media files
@@ -148,3 +150,5 @@ LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+PAGINATION_COUNT = 12

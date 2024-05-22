@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}My Next of Kins{% endblock %}
+
+{% block content %}
+<h1>My Next of Kins</h1>
+  {% if next_of_kins %}
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <th>Name</th>
+        <th>Telephone</th>
+        <th>City</th>
+        <th>(%)</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for kin in next_of_kin %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ kin.first_name|title }}&nbsp;{{ kin.last_name|title }}</td>
+          <td>{{ kin.telephone }}</td>
+          <td>{{ kin.city|title }}</td>
+          <td>{{ kin.perc }}</td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <p>No registered next of kin yet. Kindly contact the president.</p>
+    </tbody>
+    {% endif %}
+  </table>
+{% if next_of_kins %}{% include "pagination.html" with page=next_of_kins %}{% endif %}
+{% endblock %}
+
+{% block sidebar_summary %}
+{% endblock %}

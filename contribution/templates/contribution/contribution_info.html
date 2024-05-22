@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% load contribution_tags %}
+
+{% load static %}
+
+{% block title %}
+    My 
+    {% if type == 'health' %}Health{% elif type == 'pension' %}Pension{% endif %} 
+    Contributions
+{% endblock %}
+
+{% block content %}
+<h1>
+    My 
+    {% if type == 'health' %}Health{% elif  type == 'pension' %}Pension{% endif %}  
+    Contributions
+</h1>
+  {% if contributions %}
+  <table class="main-tbl">
+    <thead>
+      <tr>
+        <th>Narration</th>
+        <th>Amount</th>
+        <th>Day of payment</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for contribution in contributions %}
+        <tr>
+          <td>{{ contribution.narration }}</td>
+          <td>{{ contribution.amount|floatformat:"2g" }}</td>
+          <td>{{ contribution.created }}</td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <p>
+            No 
+            {% if type == 'health' %}health{% elif  type == 'pension' %}pension{% endif %}   
+            contributions yet.
+        </p>
+    </tbody>
+    {% endif %}
+  </table>
+{% if contributions %}{% include "pagination.html" with page=contributions %}{% endif %}
+{% endblock %}
+
+{% block sidebar_summary %}
+<div class="card" style="width: 18rem;">
+    <div class="card-header text-center bg-dark text-white">
+        Total
+        {% if type == 'health' %}Health{% elif type == 'pension' %}Pension{% endif %}
+        Contributions
+    </div>
+    <div class="card-body">
+      {% if contributions %}
+      <table class="side-tbl">
+        <thead>
+          <tr>
+            <th>Amount</th>
+            <th>Year</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% tag_total_contributions request.user.id type %}
+        </tbody>
+      </table>
+      {% else %}
+        No contributions yet.
+      {% endif %}
+  </div>
+</div>
+{% endblock %}

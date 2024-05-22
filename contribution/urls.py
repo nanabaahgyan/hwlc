@@ -5,8 +5,6 @@ from . import views
 app_name = 'contribution'
 
 urlpatterns = [
-    path('',
-         views.member_health_contributions,
-         name='health_contribution'),
-    # path('<int:id>', views.health_contribution_detail, name='health_detail')
+    path('next-of-kin/', views.member_next_of_kins, name='next_of_kin'),
+    path('<type>/', views.member_contributions, name='contribution_type'),
 ]

@@ -37,37 +37,47 @@ h2 {
     padding-left:10px; 
 }
 
-table {
+table.main-tbl, table.side-tbl {
     width:100%;
     border-spacing:10px;
     border-collapse: collapse;
 }
 
-table th, table td {
+table.side-tbl th, table.side-tbl td {
+    text-align:center;
+    font-size:13px;
+    padding:5px;
+    margin:0;
+}
+
+table.main-tbl, th, table.main-tbl td {
     text-align:left;
     font-size:18px;
     padding:10px;
     margin:0;
 }
 
-tbody tr:nth-child(odd) {
+table.side-tbl tbody tr:nth-child(even) {
+    background:#f9d3ad7e;
+}
+
+table.main-tbl tbody tr:nth-child(odd) {
     background:#efefef;
 }
 
-tbody tr.subtotal {
+table.main-tbl tbody tr.subtotal {
     background:rgb(228, 230, 223);
 }
 
-thead th, tbody tr.total {
-    background:#5993bb;
+table.main-tbl thead th, tbody tr.total {
+    background:#000;
     color:#fff;
-    font-weight:bold;
+    font-weight:inherit;
 }
 
 a.button, input[type="submit"] {
     color:#fff;
     background:#00abff;;
-    /* margin-top: 10px; */
     border-radius:4px;
     padding:10px 20px;
     font-weight: bold;
@@ -121,6 +131,17 @@ ul.messages li a.close {
     text-shadow:none;
 }
 
+div#sidebar_profile.card {
+    margin-bottom: 15px;
+}
+
+div.card-body p .prefix{ 
+    color:#9a9898;
+    font-family: georgia, serif;
+    font-size: 16px;
+    /* font-style: italic;  */
+    font-weight: bold;
+}
 
 
 /* comments */

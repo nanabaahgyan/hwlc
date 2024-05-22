@@ -7,7 +7,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}{% endblock %}</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="{% static 'css/hwlc.css' %}" rel="stylesheet">
+        <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+        <link href="{% static 'css/hwlc.css' %}" rel="stylesheet" type="text/css">
     </head>
     <body>
         
@@ -50,14 +53,17 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuContribution">
                                 <li>
-                                    <a class="dropdown-item" href="{{ health_fund.id }}">
+                                    <a class="dropdown-item" href="{% url 'contribution:contribution_type' 'health' %}">
                                         Health
                                     </a>
                                 </li>
                               <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="{% url 'contribution:contribution_type' 'pension' %}">
                                         Pension
                                     </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'contribution:next_of_kin' %}">Next of Kin</a>
                                 </li>
                             </ul>
                         </div>
@@ -95,7 +101,7 @@
 
                 <ul class="navbar-nav nav">
                     <li class="nav-item">
-                        <a class="nav-link btn btn-danger active" href="{% url 'admin:index' %}" role="button">Admin</a>
+                        <a class="nav-link btn btn-danger active" href="{% url 'admin:index' %}" role="button"><i class="fa-regular fa-id-card-clip"></i>&nbsp;Admin&nbsp;</a>
                     </li>
                 </ul>
 
@@ -121,7 +127,53 @@
                     {% endblock %}
                 </div>
                 <div class="col-12 col-md-4">
-                    {% block sidebar %}
+                    {% if request.user.user_profile %}
+                        {% block sidebar_profile %}
+                        <div class="card" style="width: 18rem;" id="sidebar_profile">
+                            <img src="{% if request.user.user_profile.photo %}
+                                        {{ request.user.user_profile.photo.url }}
+                                      {% else %}
+                                        {% static 'img/no-image.jpg' %}
+                                      {% endif %}"
+                                  class="card-img-top"
+                                  alt="Member Profile Photo">
+                            <div class="card-body">
+                              <p>
+                                <span class="prefix">Name:&nbsp;</span>
+                                {% if request.user.first_name and request.user.last_name %}
+                                    {{ request.user.first_name|title }}&nbsp;{{ request.user.last_name|title }}
+                                {% endif %}
+                              </p>
+                              <p>
+                                <span class="prefix">Telephone:&nbsp;</span>
+                                {% if request.user.user_profile.telephone != '' %}
+                                    {{ request.user.user_profile.telephone }}
+                                {% else %}
+                                    Not set
+                                {% endif %}
+                              </p>
+                              <p>
+                                <span class="prefix">DOB:&nbsp;</span>
+                                {% if request.user.user_profile.date_of_birth is not None %}
+                                    {{ request.user.user_profile.date_of_birth|date:"D, d M Y" }}
+                                {% else %}
+                                    Not set
+                                {% endif %}
+                              </p>
+                              <p>
+                                <a class="active btn btn-primary" 
+                                   href="{% url 'edit' %}" 
+                                   role="button">
+                                   <i class="fa-solid fa-circle-user"></i>&nbsp;
+                                    Edit my profile
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        {% endblock %}
+                    {% endif %}
+                    
+                    {% block sidebar_summary %}
                     {% endblock %}
                 </div>
             </div>
