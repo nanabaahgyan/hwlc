@@ -4,9 +4,6 @@ from easy_thumbnails.fields import ThumbnailerImageField
 
 from django.contrib.auth.models import User
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 
 # Create your models here.
 
@@ -18,7 +15,9 @@ class UserProfile(models.Model):
                                 on_delete=models.CASCADE,
                                 related_name='user_profile')
     telephone = models.CharField(max_length=50)
-    date_of_birth = models.DateField(blank=True, null=True)
+    date_of_birth = models.DateField(blank=True,
+                                     null=True,
+                                     verbose_name="Date of birth (yyyy-mm-dd)")
     photo = ThumbnailerImageField(upload_to='users/%Y/%m/%d/',
                                   null=True,
                                   blank=True,

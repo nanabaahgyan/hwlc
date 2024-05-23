@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Add/Edit next of kin profile{% endblock %}
+
+{% block content %}
+<h1>Add/Edit next of kin profile</h1>
+<form method="post" enctype="multipart/form-data">
+    {{ next_of_kin_form|crispy }}
+    {% csrf_token %}
+    <p>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-floppy-disk"></i>&nbsp;Save
+        </button>
+    </p>
+</form>
+{% endblock %}
+
+{% block sidebar_summary %}
+<div class="card" style="width: 18rem;" id="sidebar_profile">
+    <div class="card-header text-center bg-dark text-white">
+        Next of kin
+    </div>
+    <img src="{% if next_of_kin.get_photo_url %}
+                {{ next_of_kin.photo.url }}
+              {% else %}
+                {% if next_of_kin.sex == 'M' %}
+                    {% static 'img/no-image-M.jpg' %}
+                {% elif next_of_kin.sex == 'F' %}
+                    {% static 'img/no-image-F.jpg' %}
+                {% else %}
+                    {% static 'img/no-image-M.jpg' %}
+                {% endif %}
+              {% endif %}"
+          class="card-img-top"
+          alt="Next of kin photo">
+  </div>
+{% endblock %}

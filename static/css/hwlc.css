@@ -50,6 +50,10 @@ table.side-tbl th, table.side-tbl td {
     margin:0;
 }
 
+table.side-tbl tbody tr:nth-child(even), table.side-tbl th {
+    background:#f9d3ad7e;
+}
+
 table.main-tbl, th, table.main-tbl td {
     text-align:left;
     font-size:18px;
@@ -57,8 +61,10 @@ table.main-tbl, th, table.main-tbl td {
     margin:0;
 }
 
-table.side-tbl tbody tr:nth-child(even) {
-    background:#f9d3ad7e;
+table.main-tbl tbody tr td.controls {
+    text-align:right;
+    padding:0px;
+    margin:0;
 }
 
 table.main-tbl tbody tr:nth-child(odd) {
@@ -75,7 +81,7 @@ table.main-tbl thead th, tbody tr.total {
     font-weight:inherit;
 }
 
-a.button, input[type="submit"] {
+/* a.button, input[type="submit"] {
     color:#fff;
     background:#00abff;;
     border-radius:4px;
@@ -83,7 +89,7 @@ a.button, input[type="submit"] {
     font-weight: bold;
     font-size:16px;
     border:0;
-}
+} */
 
 .dropdown-item:hover {
     background-color: black;
@@ -143,6 +149,13 @@ div.card-body p .prefix{
     font-weight: bold;
 }
 
+/* remove dropdown buttons */
+.caret-off::before {
+    display: none;
+}
+.caret-off::after {
+    display: none;
+}
 
 /* comments */
 /* .comment {

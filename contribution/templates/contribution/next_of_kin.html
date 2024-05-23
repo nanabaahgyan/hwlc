@@ -2,12 +2,12 @@
 
 {% load static %}
 
-{% block title %}My Next of Kins{% endblock %}
+{% block title %}My next of kins{% endblock %}
 
 {% block content %}
-<h1>My Next of Kins</h1>
+<h1>My next of kins</h1>
   {% if next_of_kins %}
-  <table class="tbl">
+  <table class="main-tbl">
     <thead>
       <tr>
         <th>&nbsp;</th>
@@ -15,20 +15,36 @@
         <th>Telephone</th>
         <th>City</th>
         <th>(%)</th>
+        <th>&nbsp;</th>
       </tr>
     </thead>
     <tbody>
-        {% for kin in next_of_kin %}
+        {% for kin in next_of_kins %}
         <tr>
           <td>{{ forloop.counter }}</td>
           <td>{{ kin.first_name|title }}&nbsp;{{ kin.last_name|title }}</td>
           <td>{{ kin.telephone }}</td>
           <td>{{ kin.city|title }}</td>
           <td>{{ kin.perc }}</td>
+          <td class="controls">
+            <a class="btn btn-secondary btn-sm" href="{% url 'contribution:next_of_kin_edit' kin.id %}" title="Edit next of kin information">
+              <i class="fa-solid fa-pen"></i>
+            </a>
+            <a class="btn btn-danger btn-sm" 
+               onclick="return confirm('Are you sure you want to delete?')" 
+               href="{% url 'contribution:next_of_kin_remove' kin.id %}"
+               title="Remove next of kin from list">
+              <i class="fa-solid fa-xmark"></i>
+            </a>
+          </td>
         </tr>
         {% endfor %}
-      {% else %}
-        <p>No registered next of kin yet. Kindly contact the president.</p>
+    {% else %}
+        <p>
+          No registered next of kin yet. 
+          Kindly contact any executive to help you with it or 
+          <a href="{% url 'contribution:next_of_kin_add' %}">add one</a>&nbsp;yourself.
+        </p>
     </tbody>
     {% endif %}
   </table>
