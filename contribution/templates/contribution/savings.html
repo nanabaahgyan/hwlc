@@ -7,16 +7,16 @@
 {% block title %}
     My 
     {% if type == 'health' %}Health{% elif type == 'pension' %}Pension{% endif %} 
-    Contributions
+    Savings
 {% endblock %}
 
 {% block content %}
 <h1>
     My 
     {% if type == 'health' %}Health{% elif  type == 'pension' %}Pension{% endif %}  
-    Contributions
+    Savings
 </h1>
-  {% if contributions %}
+  {% if savings %}
   <table class="main-tbl">
     <thead>
       <tr>
@@ -26,11 +26,11 @@
       </tr>
     </thead>
     <tbody>
-        {% for contribution in contributions %}
+        {% for saved in savings %}
         <tr>
-          <td>{{ contribution.narration }}</td>
-          <td>{{ contribution.amount|floatformat:"2g" }}</td>
-          <td>{{ contribution.created }}</td>
+          <td>{{ saved.narration }}</td>
+          <td>{{ saved.amount|floatformat:"2g" }}</td>
+          <td>{{ saved.created }}</td>
         </tr>
         {% endfor %}
       {% else %}
@@ -42,7 +42,7 @@
     </tbody>
     {% endif %}
   </table>
-{% if contributions %}{% include "pagination.html" with page=contributions %}{% endif %}
+{% if savings %}{% include "pagination.html" with page=savings %}{% endif %}
 {% endblock %}
 
 {% block sidebar_summary %}
@@ -53,7 +53,7 @@
         Contributions
     </div>
     <div class="card-body">
-      {% if contributions %}
+      {% if savings %}
       <table class="side-tbl">
         <thead>
           <tr>
@@ -62,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          {% tag_total_contributions request.user.id type %}
+          {% tag_total_savings request.user.id type %}
         </tbody>
       </table>
       {% else %}

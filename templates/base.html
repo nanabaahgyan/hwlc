@@ -30,7 +30,7 @@
                         {% if request.user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="#">
-                                Hello, {{ request.user.first_name|default:request.user.username }}
+                                Hello, {{ request.user.first_name|title }}
                             </a>
                         </li>
                         {% endif %}
@@ -40,7 +40,9 @@
                                {% else %}
                                 class="nav-link"
                                {% endif %}
-                               href="{% url 'dashboard' %}">Dashboard</a>
+                               href="{% url 'dashboard' %}">
+                               Dashboard
+                            </a>
                         </li>
                         <div class="dropdown">
                             <a {% if section == "contribution" %}
@@ -53,18 +55,36 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuContribution">
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'contribution:contribution_type' 'health' %}">
-                                        Health
+                                    <a class="dropdown-item" href="{% url 'contribution:savings' %}">
+                                        All Savings
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'contribution:savings' 'health' %}">
+                                        &#45;&#45;&nbsp;Health
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'contribution:contribution_type' 'pension' %}">
-                                        Pension
+                                    <a class="dropdown-item" href="{% url 'contribution:savings' 'pension' %}">
+                                        &#45;&#45;&nbsp;Pension
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'contribution:withdrawals' %}">
+                                        All Withdrawals
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'contribution:withdrawals' 'health' %}">
+                                        &#45;&#45;&nbsp;Health
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#">
-                                        Withdrawals
+                                    <a class="dropdown-item" href="{% url 'contribution:withdrawals' 'pension' %}">
+                                        &#45;&#45;&nbsp;Pension
                                     </a>
                                 </li>
                             </ul>
@@ -111,7 +131,8 @@
                                         Change Password
                                     </a>
                                 </li>
-                              <li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
                                     <a class="dropdown-item" href="{% url 'logout' %}">
                                         <span style="color: red;">Logout</span>
                                     </a>
@@ -157,7 +178,7 @@
                             <img src="{% if request.user.user_profile.photo %}
                                         {{ request.user.user_profile.photo.url }}
                                       {% else %}
-                                        {% static 'img/no-image.jpg' %}
+                                        {% static 'img/no-image-M.jpg' %}
                                       {% endif %}"
                                   class="card-img-top"
                                   alt="Member profile photo">

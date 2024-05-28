@@ -13,4 +13,5 @@ class UserEditForm(forms.ModelForm):
 class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['telephone', 'date_of_birth', 'photo']
+        fields = ['telephone', 'date_of_birth', 'photo',
+                  'bank_name', 'bank_acct_no', 'bank_acct_branch']

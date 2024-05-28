@@ -23,6 +23,14 @@ class UserProfile(models.Model):
                                   null=True,
                                   blank=True,
                                   resize_source=dict(size=(300, 300), sharpen=True))  # type: ignore
+    bank_name = models.CharField(blank=True,
+                                 null=True)
+    bank_acct_no = models.CharField(verbose_name='Bank account no.',
+                                    blank=True,
+                                    null=True)
+    bank_acct_branch = models.CharField(verbose_name='Bank account branch',
+                                        blank=True,
+                                        null=True)
 
     def __str__(self):
         return f'Profile of {self.user}'

@@ -8,6 +8,7 @@ from .models import Savings, Withdrawal, PensionSavings
 @admin.register(Savings)
 class SavingsAdmin(admin.ModelAdmin):
     list_display = ['narration', 'member', 'amount',  'type', 'created']
+    list_per_page = 12
     fields = ['narration', 'amount', ('member', 'type'), 'created']
     list_filter = ['type', 'created', 'member']
     search_fields = ['member', 'narration']
@@ -19,11 +20,12 @@ class SavingsAdmin(admin.ModelAdmin):
 
 @admin.register(Withdrawal)
 class WithdrawalAdmin(admin.ModelAdmin):
-    list_display = ['narration', 'amount', 'member', 'type', 'when']
-    fields = ['narration', 'amount', ('member', 'type'),  'when']
-    list_filter = ['type', 'when', 'member']
+    list_display = ['narration', 'amount', 'member', 'type', 'withdrawn']
+    list_per_page = 12
+    fields = ['narration', 'amount', ('member', 'type'),  'withdrawn']
+    list_filter = ['type', 'withdrawn', 'member']
     search_fields = ['member', 'narration']
     prepopulated_fields = {'narration': ('member',)}
     raw_id_fields = ['member']
-    date_hierarchy = 'when'
-    ordering = ['type', 'when']
+    date_hierarchy = 'withdrawn'
+    ordering = ['type', 'withdrawn']

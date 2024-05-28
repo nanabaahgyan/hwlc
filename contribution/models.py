@@ -66,7 +66,7 @@ class Withdrawal(models.Model):
     member = models.ForeignKey(settings.AUTH_USER_MODEL,
                                on_delete=models.CASCADE,
                                related_name='member_withdrawal')
-    when = models.DateTimeField(default=timezone.now)
+    withdrawn = models.DateTimeField(default=timezone.now)
     type = models.CharField(max_length=2,
                             choices=Type.choices,
                             default=Type.HEALTH)
@@ -200,20 +200,19 @@ class NextOfKin(models.Model):
             .aggregate(Sum('perc'))
         total_perc = total_perc.get('perc__sum')
 
-        # verify if next of kin already exists
-        next_of_kin_exists = NextOfKin.objects.filter(pk=self.pk).exists()
+        # if next of kin exists validate assigned percentage
+        if NextOfKin.objects.filter(pk=self.pk).exists():
 
-        # if next of kin does not exists validate assigned percentage
-        if next_of_kin_exists:
             # check if percentage has changed
             if self.perc != self.__original_perc:
+
                 # get the new total for new percentage without this user
                 new_total_perc = self.__class__._default_manager\
                     .exclude(pk=self.pk)\
                     .aggregate(Sum('perc'))
                 new_total_perc = new_total_perc.get('perc__sum')
 
-                new_total_perc = new_total_perc + self.perc
+                new_total_perc = new_total_perc + self.perc  # type: ignore
 
                 # maximum percentage is 100
                 if 100 - new_total_perc < 0:
@@ -225,7 +224,7 @@ class NextOfKin(models.Model):
             else:
                 return
         else:
-            total_perc = total_perc + self.perc
+            total_perc = total_perc + self.perc  # type: ignore
 
             # maximum percentage is 100
             if 100 - total_perc < 0:
@@ -236,4 +235,4 @@ class NextOfKin(models.Model):
                 )
 
     def __str__(self):
-        return f'{self.first_name + " " + self.last_name}'
+        return f'{self.first_name} {self.last_name}'

@@ -13,22 +13,48 @@ from .forms import NextOfKinForm
 
 
 @login_required
-def member_contributions(request, type):
+def member_savings(request, type=''):
     if type == "health":
-        contribution = Savings.objects.filter(member_id=request.user.id)\
-                                      .filter(type=Type.HEALTH)
+        savings = Savings.objects.filter(member_id=request.user.id)\
+            .filter(type=Type.HEALTH)
     elif type == "pension":
-        contribution = Savings.objects.filter(member_id=request.user.id)\
-                                      .filter(type=Type.PENSION)
+        savings = Savings.objects.filter(member_id=request.user.id)\
+            .filter(type=Type.PENSION)
+    else:
+        savings = Savings.objects.filter(member_id=request.user.id)
 
     # pagination with PAGINATOR_COUNT per page
-    paginator = Paginator(contribution, settings.PAGINATION_COUNT)
+    paginator = Paginator(savings, settings.PAGINATION_COUNT)
     page_number = request.GET.get('page', 1)
-    contributions = paginator.page(page_number)
+    savings = paginator.page(page_number)
 
     return render(request,
-                  'contribution/contribution.html',
-                  {'contributions': contributions,
+                  'contribution/savings.html',
+                  {'savings': savings,
+                   'type': type,
+                   'section': 'contribution'})
+
+
+@login_required
+def member_withdrawals(request, type=''):
+    if type == "health":
+        withdrawal = Withdrawal.objects.filter(member_id=request.user.id)\
+            .filter(type=Type.HEALTH).order_by('-withdrawn')
+    elif type == "pension":
+        withdrawal = Withdrawal.objects.filter(member_id=request.user.id)\
+            .filter(type=Type.PENSION).order_by('-withdrawn')
+    else:
+        withdrawal = Withdrawal.objects.filter(
+            member_id=request.user.id).order_by('-withdrawn')
+
+    # pagination with PAGINATOR_COUNT per page
+    paginator = Paginator(withdrawal, settings.PAGINATION_COUNT)
+    page_number = request.GET.get('page', 1)
+    withdrawals = paginator.page(page_number)
+
+    return render(request,
+                  'contribution/withdrawal.html',
+                  {'withdrawals': withdrawals,
                    'type': type,
                    'section': 'contribution'})
 
@@ -117,7 +143,7 @@ def remove(request, id):
 
         next_of_kin.delete()
 
-        message = f'{next_of_kin.first_name} {next_of_kin.last_name} successfully removed as next of kin.'
+        message = f'{next_of_kin.first_name} {next_of_kin.last_name} successfully removed from next of kin.'
         messages.success(request, message)
     except:
         message = "Sorry. Something went wrong. Please try again."
