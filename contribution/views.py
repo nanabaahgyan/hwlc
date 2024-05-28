@@ -4,9 +4,9 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 
-
-from .models import Savings, Withdrawal, NextOfKin
+from .models import Savings, Type, Withdrawal, NextOfKin
 from .forms import NextOfKinForm
 
 # Create your views here.
@@ -16,10 +16,10 @@ from .forms import NextOfKinForm
 def member_contributions(request, type):
     if type == "health":
         contribution = Savings.objects.filter(member_id=request.user.id)\
-                                      .filter(type=Savings.Type.HEALTH)
+                                      .filter(type=Type.HEALTH)
     elif type == "pension":
         contribution = Savings.objects.filter(member_id=request.user.id)\
-                                      .filter(type=Savings.Type.PENSION)
+                                      .filter(type=Type.PENSION)
 
     # pagination with PAGINATOR_COUNT per page
     paginator = Paginator(contribution, settings.PAGINATION_COUNT)
@@ -49,14 +49,16 @@ def member_next_of_kins(request):
 
 
 @login_required
-def edit_next_of_kin(request, id=None):
-    next_of_kin = get_object_or_404(NextOfKin, pk=id)
+def edit_next_of_kin(request, uuid=None):
+
+    next_of_kin = get_object_or_404(NextOfKin, uuid=uuid)
 
     if request.method == 'POST':
+
         next_of_kin_form = NextOfKinForm(instance=next_of_kin,
                                          data=request.POST,
                                          files=request.FILES)
-        if next_of_kin_form.is_valid:
+        if next_of_kin_form.is_valid():
             next_of_kin_form.save()
 
             messages.success(
@@ -72,13 +74,16 @@ def edit_next_of_kin(request, id=None):
                    'next_of_kin': next_of_kin})
 
 
-@login_required
+@ login_required
 def add_next_of_kin(request):
     if request.method == 'POST':
         user = get_object_or_404(get_user_model(), id=request.user.id)
+
         next_of_kin = None
 
-        next_of_kin_form = NextOfKinForm(request.POST)
+        next_of_kin_form = NextOfKinForm(data=request.POST,
+                                         files=request.FILES)
+
         if next_of_kin_form.is_valid():
 
             # get cleaned data
@@ -94,10 +99,8 @@ def add_next_of_kin(request):
             next_of_kin.save()
 
             messages.success(
-                request, f"{cd['first_name']} {cd['last_name']} added to next of kins.")
-        else:
-            messages.error(request, 'Error adding next of kin')
-        return redirect('contribution:next_of_kin')
+                request, f"{cd['first_name']} {cd['last_name']} added as a next of kin.")
+            return redirect('contribution:next_of_kin')
     else:
         next_of_kin_form = NextOfKinForm()
 
@@ -114,7 +117,7 @@ def remove(request, id):
 
         next_of_kin.delete()
 
-        message = f'{next_of_kin.first_name} {next_of_kin.last_name} removed.'
+        message = f'{next_of_kin.first_name} {next_of_kin.last_name} successfully removed as next of kin.'
         messages.success(request, message)
     except:
         message = "Sorry. Something went wrong. Please try again."

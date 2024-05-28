@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load contribution_tags %}
+
 {% block title %}My next of kins{% endblock %}
 
 {% block content %}
@@ -27,7 +29,7 @@
           <td>{{ kin.city|title }}</td>
           <td>{{ kin.perc }}</td>
           <td class="controls">
-            <a class="btn btn-secondary btn-sm" href="{% url 'contribution:next_of_kin_edit' kin.id %}" title="Edit next of kin information">
+            <a class="btn btn-secondary btn-sm" href="{% url 'contribution:next_of_kin_edit' kin.uuid %}" title="Edit next of kin information">
               <i class="fa-solid fa-pen"></i>
             </a>
             <a class="btn btn-danger btn-sm" 
@@ -39,15 +41,21 @@
           </td>
         </tr>
         {% endfor %}
-    {% else %}
-        <p>
-          No registered next of kin yet. 
-          Kindly contact any executive to help you with it or 
-          <a href="{% url 'contribution:next_of_kin_add' %}">add one</a>&nbsp;yourself.
-        </p>
     </tbody>
-    {% endif %}
   </table>
+  <p>
+    <a class="btn btn-success btn-lg" href="{% url 'contribution:next_of_kin_add' %}" role="button" style="margin-top: 10px;">
+      <i class="fa-solid fa-plus"></i>&nbsp;New
+    </a>
+  </p>
+  {% else %}
+  <p>
+    No registered next of kin yet. 
+    Kindly contact any executive to help you with it or 
+    <a href="{% url 'contribution:next_of_kin_add' %}">add one</a>&nbsp;yourself.
+  </p>
+  {% endif %}
+
 {% if next_of_kins %}{% include "pagination.html" with page=next_of_kins %}{% endif %}
 {% endblock %}
 

@@ -1,23 +1,35 @@
 from django.db import models
+from django.db.models import Sum, F
 from django.utils import timezone
-# from django.contrib.auth.models import User
 from django.conf import settings
 from django.urls import reverse
 from easy_thumbnails.fields import ThumbnailerImageField
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.utils.translation import gettext_lazy as _
+
+import uuid
+from decimal import Decimal
 
 
 # Create your models here.
+class Type(models.TextChoices):
+    HEALTH = 'HF', 'Health Fund'
+    PENSION = 'PF', 'Pension Fund'
+
+
+class PensionSavings(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset()\
+            .filter(type=Type.HEALTH)
 
 
 class Savings(models.Model):
 
-    class Type(models.TextChoices):
-        HEALTH = 'HF', 'Health Fund'
-        PENSION = 'PF', 'Pension Fund'
-
     narration = models.CharField(max_length=50)
-    amount = models.DecimalField(max_digits=7,
-                                 decimal_places=2)
+    amount = models.DecimalField(max_digits=8,
+                                 decimal_places=2,
+                                 validators=[MinValueValidator(Decimal('0.00'))])
     member = models.ForeignKey(settings.AUTH_USER_MODEL,
                                on_delete=models.CASCADE,
                                related_name='member_savings')
@@ -25,7 +37,9 @@ class Savings(models.Model):
     type = models.CharField(max_length=2,
                             choices=Type.choices,
                             default=Type.HEALTH)
+
     objects = models.Manager()
+    pensions = PensionSavings()
 
     class Meta:
         db_table = 'savings'
@@ -36,11 +50,77 @@ class Savings(models.Model):
         ]
 
     def get_absolute_url(self):
-        return reverse('contribution-detail',
+        return reverse('savings-detail',
                        kwargs={"member": self.member})
 
     def __str__(self) -> str:
-        return f"Savings for {self.member.first_name + ' ' + self.member.last_name}"
+        return f"Contribution of {self.amount}"
+
+
+class Withdrawal(models.Model):
+
+    narration = models.CharField(max_length=50)
+    amount = models.DecimalField(max_digits=7,
+                                 decimal_places=2,
+                                 validators=[MinValueValidator(Decimal('0.00'))])
+    member = models.ForeignKey(settings.AUTH_USER_MODEL,
+                               on_delete=models.CASCADE,
+                               related_name='member_withdrawal')
+    when = models.DateTimeField(default=timezone.now)
+    type = models.CharField(max_length=2,
+                            choices=Type.choices,
+                            default=Type.HEALTH)
+
+    class Meta:
+        db_table = 'withdrawal'
+
+    def get_absolute_url(self):
+        return reverse("withdrawal-detail",
+                       kwargs={"pk": self.pk})
+
+    def clean(self, *args, **kwargs):
+        super(Withdrawal, self).clean(*args, **kwargs)
+
+        # get total savings from db
+        total_savings = Savings.objects.all()\
+            .filter(member=self.member.id)\
+            .filter(type=self.type)\
+            .aggregate(Sum('amount'))
+        total_savings = total_savings.get("amount__sum")
+
+        # if member has no savings yet they cannot withdraw money
+        if total_savings is None:
+            raise ValidationError(
+                {"amount": _(
+                    f"No savings yet for {self.member.first_name}\
+                          {self.member.last_name} on {self.type} account.")
+                 }
+            )
+
+        # get total withdrawals from db
+        total_withdrawals = self.__class__._default_manager\
+            .filter(member=self.member.id)\
+            .filter(type=self.type)\
+            .aggregate(Sum('amount'))
+        total_withdrawals = total_withdrawals.get("amount__sum")
+
+        # if this is a new withdrawal make None a 0
+        if total_withdrawals is None:
+            new_total_withdrawals = Decimal('0') + self.amount
+        else:
+            # add previous withdrawals to new one for a new total
+            new_total_withdrawals = total_withdrawals + self.amount
+
+        # check if they have enough money to withdraw. otherwise raise an error.
+        if not None and Decimal(new_total_withdrawals) > Decimal(total_savings):
+            raise ValidationError(
+                {"amount": _(
+                    f"{self.amount} is bigger than the total savings of {self.member.first_name} {self.member.last_name} on {self.type} account.")
+                 }
+            )
+
+    def __str__(self) -> str:
+        return f"Withdrawal of {self.amount}"
 
 
 class NextOfKin(models.Model):
@@ -71,10 +151,10 @@ class NextOfKin(models.Model):
     city = models.CharField(max_length=20,
                             null=False,
                             blank=True)
-    perc = models.CharField(verbose_name="Percentage",
-                            blank=False,
-                            null=False,
-                            max_length=3)
+    perc = models.DecimalField(verbose_name="Percentage",
+                               max_digits=4,
+                               decimal_places=1,)
+    country = models.CharField(max_length=20, null=True, blank=True)
     photo = ThumbnailerImageField(upload_to='kins/%Y/%m/%d',
                                   null=True,
                                   blank=True,
@@ -82,6 +162,9 @@ class NextOfKin(models.Model):
     to_member = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   on_delete=models.CASCADE,
                                   related_name='user_next_of_kin')
+    uuid = models.UUIDField(primary_key=False,
+                            default=uuid.uuid4,
+                            editable=False)
 
     class Meta:
         db_table = 'nextofkin'
@@ -97,31 +180,31 @@ class NextOfKin(models.Model):
         else:
             return None
 
+    def clean(self, *args, **kwargs):
+        """Use generic method to validate percentage field
+        https://stackoverflow.com/questions/7366363/adding-custom-django-model-validation
+        """
+        super(NextOfKin, self).clean(*args, **kwargs)
+
+        # verify if next of kin already exists
+        next_of_kin_exists = NextOfKin.objects.filter(pk=self.pk).exists()
+
+        if not next_of_kin_exists:
+            # get current total perc from db for member
+            total_perc = self.__class__._default_manager\
+                .filter(to_member_id=F('to_member'))\
+                .aggregate(Sum('perc'))
+
+            new_total_perc = total_perc.get(
+                'perc__sum') + self.perc  # type: ignore
+
+            # maximum percentage is 100
+            if 100 - new_total_perc < 0:
+                raise ValidationError(
+                    {"perc": _(
+                        f"{self.perc} makes total percentage of your\
+                            beneficiaries greater than 100.")}
+                )
+
     def __str__(self):
         return f'{self.first_name + " " + self.last_name}'
-
-
-class Withdrawal(models.Model):
-
-    class Type(models.TextChoices):
-        HEALTH = 'HF', 'Health Fund'
-        PENSION = 'PF', 'Pension Fund'
-
-    narration = models.CharField(max_length=50)
-    amount = models.DecimalField(max_digits=7, decimal_places=2)
-    member = models.ForeignKey(settings.AUTH_USER_MODEL,
-                               on_delete=models.CASCADE,
-                               related_name='member_withdrawal')
-    when = models.DateTimeField(default=timezone.now)
-    type = models.CharField(max_length=2,
-                            choices=Type.choices,
-                            default=Type.HEALTH)
-
-    class Meta:
-        db_table = 'withdrawal'
-
-    def get_absolute_url(self):
-        return reverse("withdrawal-detail", kwargs={"pk": self.pk})
-
-    def __str__(self) -> str:
-        return f"Withdrawal for {self.member.first_name + '' + self.member.last_name}"

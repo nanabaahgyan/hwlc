@@ -57,9 +57,14 @@
                                         Health
                                     </a>
                                 </li>
-                              <li>
+                                <li>
                                     <a class="dropdown-item" href="{% url 'contribution:contribution_type' 'pension' %}">
                                         Pension
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        Withdrawals
                                     </a>
                                 </li>
                             </ul>
@@ -108,7 +113,7 @@
                                 </li>
                               <li>
                                     <a class="dropdown-item" href="{% url 'logout' %}">
-                                        Logout
+                                        <span style="color: red;">Logout</span>
                                     </a>
                                 </li>
                             </ul>
@@ -133,7 +138,7 @@
             {% for message in messages %}
             <li class="{{ message.tags }}">
                 {{ message|safe }}
-                <a href="#" class="close">x</a>
+                <!-- <button type="button" class="btn-close justify-content-end" aria-label="Close"></button> -->
             </li>
             {% endfor %}
         </ul>

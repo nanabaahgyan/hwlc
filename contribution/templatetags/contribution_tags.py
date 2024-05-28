@@ -1,7 +1,7 @@
 from django import template
 from django.db import connection
 
-
+from hashlib import sha1
 from ..models import Savings
 
 register = template.Library()
