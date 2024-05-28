@@ -128,6 +128,9 @@ class NextOfKin(models.Model):
         Male = 'M', 'Male'
         Female = 'F', 'Female'
 
+    # initiate original percentage to None
+    __original_perc = None
+
     first_name = models.CharField(verbose_name="First Name",
                                   blank=False,
                                   null=False,
@@ -170,6 +173,11 @@ class NextOfKin(models.Model):
         db_table = 'nextofkin'
         ordering = ['-perc']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # set original percentage to what already is
+        self.__original_perc = self.perc
+
     def get_absolute_url(self):
         return reverse('next-of-kin', kwargs={"pk": self.pk})
 
@@ -186,20 +194,41 @@ class NextOfKin(models.Model):
         """
         super(NextOfKin, self).clean(*args, **kwargs)
 
+        # get current total perc from db for member
+        total_perc = self.__class__._default_manager\
+            .filter(to_member_id=F('to_member'))\
+            .aggregate(Sum('perc'))
+        total_perc = total_perc.get('perc__sum')
+
         # verify if next of kin already exists
         next_of_kin_exists = NextOfKin.objects.filter(pk=self.pk).exists()
 
-        if not next_of_kin_exists:
-            # get current total perc from db for member
-            total_perc = self.__class__._default_manager\
-                .filter(to_member_id=F('to_member'))\
-                .aggregate(Sum('perc'))
+        # if next of kin does not exists validate assigned percentage
+        if next_of_kin_exists:
+            # check if percentage has changed
+            if self.perc != self.__original_perc:
+                # get the new total for new percentage without this user
+                new_total_perc = self.__class__._default_manager\
+                    .exclude(pk=self.pk)\
+                    .aggregate(Sum('perc'))
+                new_total_perc = new_total_perc.get('perc__sum')
 
-            new_total_perc = total_perc.get(
-                'perc__sum') + self.perc  # type: ignore
+                new_total_perc = new_total_perc + self.perc
+
+                # maximum percentage is 100
+                if 100 - new_total_perc < 0:
+                    raise ValidationError(
+                        {"perc": _(
+                            f"{self.perc} makes total percentage of your\
+                                beneficiaries greater than 100.")}
+                    )
+            else:
+                return
+        else:
+            total_perc = total_perc + self.perc
 
             # maximum percentage is 100
-            if 100 - new_total_perc < 0:
+            if 100 - total_perc < 0:
                 raise ValidationError(
                     {"perc": _(
                         f"{self.perc} makes total percentage of your\
