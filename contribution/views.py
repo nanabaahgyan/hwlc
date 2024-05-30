@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
+from django.http import HttpResponseRedirect
 
 from .models import Savings, Type, Withdrawal, NextOfKin
 from .forms import NextOfKinForm
@@ -84,13 +85,15 @@ def edit_next_of_kin(request, uuid=None):
         next_of_kin_form = NextOfKinForm(instance=next_of_kin,
                                          data=request.POST,
                                          files=request.FILES)
+
         if next_of_kin_form.is_valid():
-            next_of_kin_form.save()
+            next_of_kin.save()
 
             messages.success(
-                request, f"{next_of_kin.first_name} {next_of_kin.last_name}'s profile updated successfully")
+                request, f"{next_of_kin.first_name} {next_of_kin.last_name}'s profile updated successfully.")
+            HttpResponseRedirect('edit/')
         else:
-            messages.error(request, 'Error updating profile of next of kin')
+            messages.error(request, 'Error updating profile of next of kin.')
     else:
         next_of_kin_form = NextOfKinForm(instance=next_of_kin)
 
@@ -107,8 +110,9 @@ def add_next_of_kin(request):
 
         next_of_kin = None
 
-        next_of_kin_form = NextOfKinForm(data=request.POST,
-                                         files=request.FILES)
+        next_of_kin_form = NextOfKinForm(
+            data=request.POST,
+            files=request.FILES)
 
         if next_of_kin_form.is_valid():
 
@@ -128,7 +132,8 @@ def add_next_of_kin(request):
                 request, f"{cd['first_name']} {cd['last_name']} added as a next of kin.")
             return redirect('contribution:next_of_kin')
     else:
-        next_of_kin_form = NextOfKinForm()
+        next_of_kin_form = NextOfKinForm(
+            initial={'to_member': request.user.pk})
 
     return render(request,
                   'contribution/next_of_kin_edit.html',

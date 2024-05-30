@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.conf import settings
 
-from .models import Savings, Withdrawal, PensionSavings
+from .models import Savings, Withdrawal 
 
 # Register your models here.
 
@@ -8,7 +9,7 @@ from .models import Savings, Withdrawal, PensionSavings
 @admin.register(Savings)
 class SavingsAdmin(admin.ModelAdmin):
     list_display = ['narration', 'member', 'amount',  'type', 'created']
-    list_per_page = 12
+    list_per_page = settings.PAGINATION_COUNT
     fields = ['narration', 'amount', ('member', 'type'), 'created']
     list_filter = ['type', 'created', 'member']
     search_fields = ['member', 'narration']

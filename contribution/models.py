@@ -128,9 +128,6 @@ class NextOfKin(models.Model):
         Male = 'M', 'Male'
         Female = 'F', 'Female'
 
-    # initiate original percentage to None
-    __original_perc = None
-
     first_name = models.CharField(verbose_name="First Name",
                                   blank=False,
                                   null=False,
@@ -156,8 +153,10 @@ class NextOfKin(models.Model):
                             blank=True)
     perc = models.DecimalField(verbose_name="Percentage",
                                max_digits=4,
-                               decimal_places=1,)
-    country = models.CharField(max_length=20, null=True, blank=True)
+                               decimal_places=1)
+    country = models.CharField(max_length=20,
+                               null=True,
+                               blank=True)
     photo = ThumbnailerImageField(upload_to='kins/%Y/%m/%d',
                                   null=True,
                                   blank=True,
@@ -173,11 +172,6 @@ class NextOfKin(models.Model):
         db_table = 'nextofkin'
         ordering = ['-perc']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # set original percentage to what already is
-        self.__original_perc = self.perc
-
     def get_absolute_url(self):
         return reverse('next-of-kin', kwargs={"pk": self.pk})
 
@@ -189,50 +183,41 @@ class NextOfKin(models.Model):
             return None
 
     def clean(self, *args, **kwargs):
-        """Use generic method to validate percentage field
-        https://stackoverflow.com/questions/7366363/adding-custom-django-model-validation
-        """
+        """Use generic method to validate percentage field"""
         super(NextOfKin, self).clean(*args, **kwargs)
 
-        # get current total perc from db for member
-        total_perc = self.__class__._default_manager\
-            .filter(to_member_id=F('to_member'))\
-            .aggregate(Sum('perc'))
-        total_perc = total_perc.get('perc__sum')
-
         # if next of kin exists validate assigned percentage
-        if NextOfKin.objects.filter(pk=self.pk).exists():
+        if NextOfKin.objects.filter(to_member=self.to_member.pk).exists():
 
-            # check if percentage has changed
-            if self.perc != self.__original_perc:
+            # get total member percentage. exclude already existing value
+            total_perc = NextOfKin.objects\
+                .filter(to_member=self.to_member.pk)\
+                .exclude(id=self.pk)\
+                .aggregate(Sum('perc'))
+            total_perc = total_perc.get('perc__sum')
 
-                # get the new total for new percentage without this user
-                new_total_perc = self.__class__._default_manager\
-                    .exclude(pk=self.pk)\
-                    .aggregate(Sum('perc'))
-                new_total_perc = new_total_perc.get('perc__sum')
+        else: 
+            
+            # new entry
+            total_perc = NextOfKin.objects\
+                .filter(to_member=self.to_member.pk)\
+                .aggregate(Sum('perc'))
+            total_perc = total_perc.get('perc__sum')
 
-                new_total_perc = new_total_perc + self.perc  # type: ignore
+        # make sure perc is not None
+        if total_perc is None:
+            total_perc = 0
 
-                # maximum percentage is 100
-                if 100 - new_total_perc < 0:
-                    raise ValidationError(
-                        {"perc": _(
-                            f"{self.perc} makes total percentage of your\
-                                beneficiaries greater than 100.")}
-                    )
-            else:
-                return
-        else:
-            total_perc = total_perc + self.perc  # type: ignore
+        # calculate new total
+        new_total_perc = total_perc + self.perc  # type: ignore
 
-            # maximum percentage is 100
-            if 100 - total_perc < 0:
-                raise ValidationError(
-                    {"perc": _(
-                        f"{self.perc} makes total percentage of your\
-                            beneficiaries greater than 100.")}
-                )
+        # maximum percentage is 100. raise error if more
+        if 100 - new_total_perc < 0:
+            raise ValidationError(
+                {"perc": _(
+                    f"{self.perc} makes total percentage of your\
+                        beneficiaries greater than 100.")}
+            )
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'

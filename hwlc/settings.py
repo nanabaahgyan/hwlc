@@ -128,7 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    '/home/nbg/Python/PyDev Project/hwlcApp/.hwlc-env/lib/python3.10/site-packages/fontawesomefree/static/'
+    '/home/nbg/Python/PyDev Project/hwlcApp/.hwlc-env/lib/python3.10/site-packages/fontawesomefree/static/',
 ]
 
 # Serving media files
