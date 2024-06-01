@@ -160,7 +160,6 @@
             {% for message in messages %}
             <li class="{{ message.tags }}">
                 {{ message|safe }}
-                <!-- <button type="button" class="btn-close justify-content-end" aria-label="Close"></button> -->
             </li>
             {% endfor %}
         </ul>
@@ -176,6 +175,9 @@
                     {% if request.user.user_profile %}
                         {% block sidebar_profile %}
                         <div class="card" style="width: 18rem;" id="sidebar_profile">
+                            <div class="card-header text-center bg-dark text-white">
+                                My profile
+                            </div>
                             <img src="{% if request.user.user_profile.photo %}
                                         {{ request.user.user_profile.photo.url }}
                                       {% else %}
@@ -191,17 +193,17 @@
                                 {% endif %}
                               </p>
                               <p>
+                                <span class="prefix">Email:&nbsp;</span>
+                                {% if request.user.email %}
+                                    {{ request.user.email }}
+                                {% endif %}
+                              </p>
+                              <p>
                                 <span class="prefix">Telephone:&nbsp;</span>
                                 {% if request.user.user_profile.telephone != '' %}
                                     {{ request.user.user_profile.telephone }}
                                 {% else %}
                                     Not set
-                                {% endif %}
-                              </p>
-                              <p>
-                                <span class="prefix">Email:&nbsp;</span>
-                                {% if request.user.email %}
-                                    {{ request.user.email }}
                                 {% endif %}
                               </p>
                               <p>

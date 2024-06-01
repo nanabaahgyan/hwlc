@@ -33,4 +33,4 @@ class UserProfile(models.Model):
                                         null=True)
 
     def __str__(self):
-        return f'Profile of {self.user}'
+        return f'Profile of {self.user.first_name} {self.user.last_name}' # type: ignore

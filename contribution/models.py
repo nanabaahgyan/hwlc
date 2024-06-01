@@ -1,13 +1,14 @@
 from django.db import models
-from django.db.models import Sum, F
+from django.db.models import Sum
 from django.utils import timezone
 from django.conf import settings
 from django.urls import reverse
 from easy_thumbnails.fields import ThumbnailerImageField
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
+import datetime
 import uuid
 from decimal import Decimal
 
@@ -16,12 +17,6 @@ from decimal import Decimal
 class Type(models.TextChoices):
     HEALTH = 'HF', 'Health Fund'
     PENSION = 'PF', 'Pension Fund'
-
-
-class PensionSavings(models.Manager):
-    def get_queryset(self) -> models.QuerySet:
-        return super().get_queryset()\
-            .filter(type=Type.HEALTH)
 
 
 class Savings(models.Model):
@@ -37,9 +32,6 @@ class Savings(models.Model):
     type = models.CharField(max_length=2,
                             choices=Type.choices,
                             default=Type.HEALTH)
-
-    objects = models.Manager()
-    pensions = PensionSavings()
 
     class Meta:
         db_table = 'savings'
@@ -123,14 +115,54 @@ class Withdrawal(models.Model):
         return f"Withdrawal of {self.amount}"
 
 
+class Investment(models.Model):
+    narration = models.CharField(max_length=50)
+    amount = models.DecimalField(max_digits=10,
+                                 decimal_places=2,
+                                 help_text="Amount invested",
+                                 validators=[MinValueValidator(Decimal('0.00'))])
+    maturity = models.IntegerField(default=0,
+                                   help_text="Maturity type",
+                                   validators=[MinValueValidator(0),
+                                               MaxValueValidator(100)])
+    is_active = models.BooleanField(default=True,
+                                    help_text="Is this investment still active?")
+    rate = models.DecimalField(max_digits=5,
+                               decimal_places=2,
+                               help_text="Rate at the time of transaction",
+                               validators=[MinValueValidator(Decimal('0.00'))])
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                     related_name='investments_made',
+                                     verbose_name='contributors',
+                                     blank=True)
+    interest = models.DecimalField(blank=True,
+                                   null=True,
+                                   max_digits=10,
+                                   decimal_places=2,
+                                   help_text="Interest earned on investment",
+                                   validators=[MinValueValidator(Decimal(0.00))])
+    created = models.DateTimeField(default=timezone.now,
+                                   help_text="Start of transaction")
+    ended = models.DateTimeField(default=timezone.now() + datetime.timedelta(days=91),
+                                 help_text="Day of maturity")
+    trader = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ['-created']
+        db_table = 'investment'
+
+    def __str__(self) -> str:
+        return f"Investment of {self.amount}"
+
+
 class NextOfKin(models.Model):
     class Sex(models.TextChoices):
         Male = 'M', 'Male'
         Female = 'F', 'Female'
 
     first_name = models.CharField(verbose_name="First Name",
-                                  blank=False,
-                                  null=False,
+                                  #   blank=False,
+                                  #   null=False,
                                   max_length=50)
     last_name = models.CharField(verbose_name="Last Name",
                                  blank=False,
@@ -153,7 +185,8 @@ class NextOfKin(models.Model):
                             blank=True)
     perc = models.DecimalField(verbose_name="Percentage",
                                max_digits=4,
-                               decimal_places=1)
+                               decimal_places=1,
+                               validators=[MinValueValidator(Decimal('0.0'))])
     country = models.CharField(max_length=20,
                                null=True,
                                blank=True)
@@ -195,16 +228,13 @@ class NextOfKin(models.Model):
                 .exclude(id=self.pk)\
                 .aggregate(Sum('perc'))
             total_perc = total_perc.get('perc__sum')
-
-        else: 
-            
-            # new entry
+        else:
+            # a new entry
             total_perc = NextOfKin.objects\
                 .filter(to_member=self.to_member.pk)\
                 .aggregate(Sum('perc'))
             total_perc = total_perc.get('perc__sum')
-
-        # make sure perc is not None
+        # make None results 0
         if total_perc is None:
             total_perc = 0
 

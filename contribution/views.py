@@ -4,7 +4,6 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.db.models import Sum
 from django.http import HttpResponseRedirect
 
 from .models import Savings, Type, Withdrawal, NextOfKin
@@ -94,6 +93,7 @@ def edit_next_of_kin(request, uuid=None):
             HttpResponseRedirect('edit/')
         else:
             messages.error(request, 'Error updating profile of next of kin.')
+            HttpResponseRedirect('edit/')
     else:
         next_of_kin_form = NextOfKinForm(instance=next_of_kin)
 
@@ -131,6 +131,9 @@ def add_next_of_kin(request):
             messages.success(
                 request, f"{cd['first_name']} {cd['last_name']} added as a next of kin.")
             return redirect('contribution:next_of_kin')
+        else:
+            messages.error(request, 'Error updating profile of next of kin.')
+            HttpResponseRedirect('add/')
     else:
         next_of_kin_form = NextOfKinForm(
             initial={'to_member': request.user.pk})
@@ -148,7 +151,8 @@ def remove(request, id):
 
         next_of_kin.delete()
 
-        message = f'{next_of_kin.first_name} {next_of_kin.last_name} successfully removed from next of kin.'
+        message = f'{next_of_kin.first_name} {next_of_kin.last_name}\
+          successfully removed from next of kin.'
         messages.success(request, message)
     except:
         message = "Sorry. Something went wrong. Please try again."

@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
 
@@ -9,6 +9,12 @@ from .forms import UserEditForm, ProfileEditForm
 from .models import UserProfile
 
 # Create your views here.
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return render(request, 'registration/logged_out.html', {})
 
 
 @login_required
